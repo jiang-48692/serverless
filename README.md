@@ -3,7 +3,7 @@
 
 以上の2点だけ実施していれば、任意のアカウントに`cdk deploy`コマンドだけでこのシステムを構築可能
 
-
+CICDを動くためには
 
 # Welcome to your CDK Python project!
 

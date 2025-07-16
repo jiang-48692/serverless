@@ -14,7 +14,7 @@ FlaskLambdaStack(app, "FlaskLambdaStack",
 )
 
 OidcRoleStack(app, "OidcRoleStack",
-  repo="serverless",
+  repo="jiang-48692/serverless",
   env=Environment(
     region="ap-northeast-1",
     account=os.getenv('CDK_DEFAULT_ACCOUNT', '773257008471')  # Default account if not set

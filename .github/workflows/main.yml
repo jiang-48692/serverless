@@ -16,6 +16,12 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::773257008471:role/github-oidc-cdk-deploy
           aws-region: ap-northeast-1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+  
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
 
       - uses: actions/setup-python@v5
         with:

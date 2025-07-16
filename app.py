@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
 import os
-
 from aws_cdk import App, Stack, Environment
-
-from stack import FlaskLambdaStack
+from main_stack import FlaskLambdaStack
+from cicd_stack import OidcRoleStack
 
 
 app = App()
 FlaskLambdaStack(app, "FlaskLambdaStack",
+  env=Environment(
+    region="ap-northeast-1",
+    account=os.getenv('CDK_DEFAULT_ACCOUNT', '773257008471')  # Default account if not set
+  )
+)
+
+OidcRoleStack(app, "OidcRoleStack",
+  repo="serverless",
   env=Environment(
     region="ap-northeast-1",
     account=os.getenv('CDK_DEFAULT_ACCOUNT', '773257008471')  # Default account if not set

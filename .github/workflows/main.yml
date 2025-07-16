@@ -1,0 +1,28 @@
+name: CDK Deploy
+on:
+  push:
+    branches: [ main ]
+permissions:
+  id-token: write      # OIDC 用
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::773257008471:role/github-oidc-cdk-deploy
+          aws-region: ap-northeast-1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install deps & CDK synth/deploy
+        run: |
+          pip install -r requirements.txt
+          cdk synth
+          cdk deploy --require-approval never

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="utf-8" />
+ <title>DynamoDB Echo</title>
+ <style>
+   body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+   input[type="text"] { width: 300px; padding: 8px; margin-right: 10px; }
+   button { padding: 8px 16px; background: #007bff; color: white; border: none; cursor: pointer; }
+   button:hover { background: #0056b3; }
+   #status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+   .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+   .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+   ul { list-style-type: none; padding: 0; }
+   li { padding: 8px; margin: 4px 0; background: #f8f9fa; border-radius: 4px; }
+ </style>
+</head>
+<body>
+ <h1>Test App</h1>
+ <input id="inputText" type="text" placeholder="何か入力する" />
+ <button onclick="send()">送る</button>
+ <p id="status"></p>
+ <h2>直近10件の履歴：</h2>
+ <ul id="history"></ul>
+ 
+ <script>
+    /**
+    * このスクリプトは、DynamoDB Echoアプリケーションのフロントエンド部分です。
+    * ユーザーが入力したテキストをDynamoDBに保存し、DBから最新の履歴を表示します。
+    */
+ async function send() {
+   const input = document.getElementById("inputText").value;
+   const statusEl = document.getElementById("status");
+   
+   if (!input.trim()) {
+     showStatus("何か入力してください", "error");
+     return;
+   }
+   
+   try {
+     const res = await fetch("/submit", {
+       method: "POST",
+       headers: {"Content-Type": "application/json"},
+       body: JSON.stringify({ text: input.trim() })
+     });
+     
+     if (!res.ok) {
+       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+     }
+     
+     const contentType = res.headers.get('content-type');
+     if (!contentType || !contentType.includes('application/json')) {
+       const textResponse = await res.text();
+       throw new Error(`JSON以外のレスポンス: ${textResponse}`);
+     }
+     
+     const data = await res.json();
+     
+     if (data.message) {
+       showStatus(data.message, "success");
+       document.getElementById("inputText").value = "";
+       loadLatest();
+     } else if (data.error) {
+       showStatus(data.error, "error");
+     }
+     
+   } catch (error) {
+     console.error("リクエストエラー:", error);
+     showStatus(`エラー: ${error.message}`, "error");
+   }
+ }
+ 
+ async function loadLatest() {
+   try {
+     const res = await fetch("/latest");
+     
+     if (!res.ok) {
+       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+     }
+     
+     const contentType = res.headers.get('content-type');
+     if (!contentType || !contentType.includes('application/json')) {
+       const textResponse = await res.text();
+       throw new Error(`JSON以外のレスポンス: ${textResponse}`);
+     }
+     
+     const items = await res.json();
+     const list = document.getElementById("history");
+     list.innerHTML = "";
+     
+     if (Array.isArray(items) && items.length > 0) {
+       items.forEach(item => {
+         const li = document.createElement("li");
+         const date = new Date(item.created_at).toLocaleString();
+         li.innerText = `${item.text} (${date})`;
+         list.appendChild(li);
+       });
+     } else {
+       const li = document.createElement("li");
+       li.innerText = "データがない";
+       li.style.fontStyle = "italic";
+       li.style.color = "#666";
+       list.appendChild(li);
+     }
+     
+   } catch (error) {
+     console.error("履歴ロードエラー:", error);
+     showStatus(`ロードエラー: ${error.message}`, "error");
+   }
+ }
+ 
+ function showStatus(message, type) {
+   const statusEl = document.getElementById("status");
+   statusEl.innerText = message;
+   statusEl.className = type;
+ }
+ 
+ loadLatest();
+ 
+ document.getElementById("inputText").addEventListener("keypress", function(e) {
+   if (e.key === "Enter") {
+     send();
+   }
+ });
+ </script>
+</body>
+</html>

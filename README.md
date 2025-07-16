@@ -1,3 +1,9 @@
+* CDK CLIセキュリティ認証情報設定
+* AWS環境（デプロイするリージョン）をブートストラップ
+
+以上の2点だけ実施していれば、任意のアカウントに`cdk deploy`コマンドだけでこのシステムを構築可能
+
+
 
 # Welcome to your CDK Python project!
 

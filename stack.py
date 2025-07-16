@@ -19,6 +19,10 @@ class FlaskLambdaStack(Stack):
         main_table = dynamodb.Table(self, "MainTable",
             table_name="main",
             partition_key=dynamodb.Attribute(
+                name="pk",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
@@ -75,15 +79,13 @@ class FlaskLambdaStack(Stack):
                 stage_name="prod",
                 throttling_rate_limit=100,
                 throttling_burst_limit=200,
-                logging_level=apigw.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
                 metrics_enabled=True
             ),
             # Enable CORS for the API
             default_cors_preflight_options=apigw.CorsOptions(
                 allow_origins=apigw.Cors.ALL_ORIGINS,
-                allow_methods=apigw.Cors.ALL_METHODS,
-                allow_headers=["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key"]
+                allow_methods=apigw.Cors.ALL_METHODS
             )
         )
 
